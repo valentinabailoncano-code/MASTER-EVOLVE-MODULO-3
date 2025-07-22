@@ -110,3 +110,4 @@ streamlit run proyecto/app.py
 Valentina Bailón Cano  
 Máster en Data Science & Inteligencia Artificial – EVOLVE  
 LinkedIn: https://www.linkedin.com/in/valentina-bailon-2653b22b7
+Streamlit: https://master-evolve-modulo-3.streamlit.app/
