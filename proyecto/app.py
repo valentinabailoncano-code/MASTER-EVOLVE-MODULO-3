@@ -1,14 +1,20 @@
-import streamlit as st
 import json
 import datetime
 import re
 import os
+import streamlit as st
 
-# ---------- Cargar o inicializar datos ----------
-USUARIOS_FILE = "usuarios.json"
-FACTURAS_FILE = "facturas.json"
+# ============================================
+# 📦 CARGA Y GUARDADO DE DATOS
+# ============================================
+
+USUARIOS_FILE = "data/usuarios.json"
+FACTURAS_FILE = "data/facturas.json"
 
 def cargar_datos():
+    """
+    Carga los datos de usuarios y facturas desde archivos JSON locales.
+    """
     if os.path.exists(USUARIOS_FILE):
         with open(USUARIOS_FILE, "r", encoding="utf-8") as f:
             usuarios = json.load(f)
@@ -24,21 +30,30 @@ def cargar_datos():
     return usuarios, facturas
 
 def guardar_datos(usuarios, facturas):
+    """
+    Guarda los datos de usuarios y facturas en archivos JSON locales.
+    """
     with open(USUARIOS_FILE, "w", encoding="utf-8") as f:
         json.dump(usuarios, f, indent=4, ensure_ascii=False)
     with open(FACTURAS_FILE, "w", encoding="utf-8") as f:
         json.dump(facturas, f, indent=4, ensure_ascii=False)
 
-usuarios, facturas = cargar_datos()
-
 def generar_id(base, cantidad):
+    """
+    Genera un ID único con prefijo y número incremental.
+    """
     return f"{base}{cantidad+1:03d}"
 
-# ---------- Funciones de utilidad ----------
 def email_valido(email):
+    """
+    Verifica si el email tiene un formato válido.
+    """
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
 def resumen_financiero(usuarios, facturas):
+    """
+    Calcula totales de facturación por usuario.
+    """
     resumen = []
     for email, u in usuarios.items():
         user_facts = [f for f in facturas if f['email'] == email]
@@ -55,11 +70,17 @@ def resumen_financiero(usuarios, facturas):
         })
     return resumen
 
-# ---------- Interfaz Streamlit ----------
-st.set_page_config(page_title="Sistema CRM", layout="wide")
-st.title("Sistema CRM - Gestión de Clientes y Facturación")
+# Carga inicial
+usuarios, facturas = cargar_datos()
 
-menu = st.sidebar.radio("Menú", [
+# ============================================
+# 🌐 INTERFAZ STREAMLIT
+# ============================================
+
+st.set_page_config(page_title="Sistema CRM", layout="wide")
+st.title("📋 Sistema CRM - Gestión de Clientes y Facturación")
+
+menu = st.sidebar.radio("📁 Menú Principal", [
     "Registrar Usuario",
     "Crear Factura",
     "Ver Usuarios",
@@ -69,9 +90,11 @@ menu = st.sidebar.radio("Menú", [
     "Resumen Financiero"
 ])
 
-# ---------- Registrar Usuario ----------
+# ============================================
+# 👤 REGISTRO DE USUARIO
+# ============================================
 if menu == "Registrar Usuario":
-    st.subheader("Registrar Nuevo Usuario")
+    st.subheader("➕ Registrar Nuevo Usuario")
     nombre = st.text_input("Nombre")
     apellidos = st.text_input("Apellidos")
     email = st.text_input("Email")
@@ -79,12 +102,13 @@ if menu == "Registrar Usuario":
     direccion = st.text_input("Dirección (opcional)")
 
     if st.button("Registrar"):
+        email = email.strip().lower()
         if not nombre or not apellidos or not email:
-            st.warning("Nombre, apellidos y email son obligatorios.")
+            st.warning("❗ Nombre, apellidos y email son obligatorios.")
         elif not email_valido(email):
-            st.warning("Formato de email no válido.")
+            st.warning("❗ Formato de email no válido.")
         elif email in usuarios:
-            st.error("Este email ya está registrado.")
+            st.error("⚠️ Este email ya está registrado.")
         else:
             id_usuario = generar_id("USR", len(usuarios))
             usuarios[email] = {
@@ -96,11 +120,13 @@ if menu == "Registrar Usuario":
                 "fecha_registro": datetime.date.today().strftime("%d/%m/%Y")
             }
             guardar_datos(usuarios, facturas)
-            st.success(f"Usuario registrado con ID {id_usuario}")
+            st.success(f"✅ Usuario registrado con ID {id_usuario}")
 
-# ---------- Crear Factura ----------
+# ============================================
+# 🧾 CREAR FACTURA
+# ============================================
 elif menu == "Crear Factura":
-    st.subheader("Crear Factura")
+    st.subheader("🧾 Crear Factura")
     if usuarios:
         selected_email = st.selectbox("Seleccionar Usuario", list(usuarios.keys()))
         descripcion = st.text_input("Descripción del servicio/producto")
@@ -119,13 +145,15 @@ elif menu == "Crear Factura":
             }
             facturas.append(factura)
             guardar_datos(usuarios, facturas)
-            st.success(f"Factura registrada correctamente.")
+            st.success("✅ Factura registrada correctamente.")
     else:
-        st.info("No hay usuarios registrados.")
+        st.info("ℹ️ No hay usuarios registrados.")
 
-# ---------- Ver todos los usuarios ----------
+# ============================================
+# 📄 VER TODOS LOS USUARIOS
+# ============================================
 elif menu == "Ver Usuarios":
-    st.subheader("Lista de Usuarios Registrados")
+    st.subheader("📄 Lista de Usuarios Registrados")
     if usuarios:
         df = []
         for u in usuarios.values():
@@ -138,18 +166,20 @@ elif menu == "Ver Usuarios":
             })
         st.dataframe(df)
     else:
-        st.info("Aún no hay usuarios registrados.")
+        st.info("ℹ️ Aún no hay usuarios registrados.")
 
-# ---------- Buscar Usuario ----------
+# ============================================
+# 🔍 BUSCAR USUARIO
+# ============================================
 elif menu == "Buscar Usuario":
-    st.subheader("Buscar Usuario")
+    st.subheader("🔍 Buscar Usuario")
     criterio = st.radio("Buscar por:", ["Email", "Nombre"])
     consulta = st.text_input("Introduce tu búsqueda")
 
     if st.button("Buscar"):
         resultados = []
         if criterio == "Email":
-            usuario = usuarios.get(consulta)
+            usuario = usuarios.get(consulta.strip().lower())
             if usuario:
                 resultados.append(usuario)
         else:
@@ -162,45 +192,51 @@ elif menu == "Buscar Usuario":
                 st.write(f"- Dirección: {u['direccion']}")
                 st.write(f"- Fecha de registro: {u['fecha_registro']}")
         else:
-            st.warning("No se encontraron coincidencias.")
+            st.warning("⚠️ No se encontraron coincidencias.")
 
-# ---------- Facturas por Usuario ----------
+# ============================================
+# 🧾 FACTURAS POR USUARIO
+# ============================================
 elif menu == "Facturas por Usuario":
-    st.subheader("Facturas por Usuario")
+    st.subheader("📑 Facturas por Usuario")
     if usuarios:
         selected_email = st.selectbox("Seleccionar Usuario", list(usuarios.keys()))
         user_facts = [f for f in facturas if f["email"] == selected_email]
         if user_facts:
-            st.write(f"Facturas de {usuarios[selected_email]['nombre']}:")
+            st.write(f"📄 Facturas de {usuarios[selected_email]['nombre']}:")
             st.table(user_facts)
         else:
-            st.info("Este usuario no tiene facturas registradas.")
+            st.info("ℹ️ Este usuario no tiene facturas registradas.")
     else:
-        st.info("No hay usuarios en el sistema.")
+        st.info("ℹ️ No hay usuarios en el sistema.")
 
-# ---------- Eliminar Usuario ----------
+# ============================================
+# 🗑️ ELIMINAR USUARIO
+# ============================================
 elif menu == "Eliminar Usuario":
-    st.subheader("Eliminar Usuario Registrado")
+    st.subheader("🗑️ Eliminar Usuario Registrado")
     if usuarios:
         selected_email = st.selectbox("Selecciona un usuario para eliminar", list(usuarios.keys()))
         usuario = usuarios[selected_email]
         st.write(f"**Nombre:** {usuario['nombre']}")
         st.write(f"**Email:** {usuario['email']}")
-        confirm = st.checkbox("Confirmar eliminación")
+        confirm = st.checkbox("✅ Confirmar eliminación")
 
         if confirm and st.button("Eliminar"):
             del usuarios[selected_email]
             facturas = [f for f in facturas if f["email"] != selected_email]
             guardar_datos(usuarios, facturas)
-            st.success("Usuario y facturas eliminados correctamente.")
+            st.success("✅ Usuario y facturas eliminados correctamente.")
     else:
-        st.info("No hay usuarios para eliminar.")
+        st.info("ℹ️ No hay usuarios para eliminar.")
 
-# ---------- Resumen Financiero ----------
+# ============================================
+# 📊 RESUMEN FINANCIERO
+# ============================================
 elif menu == "Resumen Financiero":
-    st.subheader("Resumen Financiero por Usuario")
+    st.subheader("📊 Resumen Financiero por Usuario")
     resumen = resumen_financiero(usuarios, facturas)
     if resumen:
         st.dataframe(resumen)
     else:
-        st.info("No hay datos suficientes para mostrar el resumen.")
+        st.info("ℹ️ No hay datos suficientes para mostrar el resumen.")
