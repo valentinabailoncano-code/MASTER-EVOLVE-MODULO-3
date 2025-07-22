@@ -258,13 +258,70 @@ elif menu == "📊 Ver Estadísticas":
         st.info("No hay datos de facturación disponibles.")
 
 # ============================================
-# ⬇️ EXPORTAR CSV
+# ⬇️ EXPORTAR DATOS
+# ============================================
+
+from fpdf import FPDF
+import base64
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font("Arial", "B", 12)
+        self.cell(0, 10, self.title, ln=True, align="C")
+        self.ln(10)
+
+    def table(self, header, data, col_widths):
+        self.set_font("Arial", "B", 10)
+        for i, col in enumerate(header):
+            self.cell(col_widths[i], 8, col, border=1)
+        self.ln()
+        self.set_font("Arial", "", 9)
+        for row in data:
+            for i, col in enumerate(row):
+                self.cell(col_widths[i], 8, str(col), border=1)
+            self.ln()
+
+def generar_pdf_usuarios(usuarios):
+    pdf = PDF()
+    pdf.title = "Listado de Usuarios"
+    pdf.add_page()
+    header = ["Nombre", "Email", "Teléfono", "Registro"]
+    rows = [[u["nombre"], u["email"], u["telefono"], u["fecha_registro"]] for u in usuarios.values()]
+    pdf.table(header, rows, [40, 50, 40, 40])
+    return pdf.output(dest='S').encode('latin1')
+
+def generar_pdf_facturas(facturas):
+    pdf = PDF()
+    pdf.title = "Listado de Facturas"
+    pdf.add_page()
+    header = ["Cliente", "Email", "Fecha", "Monto"]
+    rows = [[f["cliente"], f["email"], f["fecha"], f["monto"]] for f in facturas]
+    pdf.table(header, rows, [40, 50, 40, 30])
+    return pdf.output(dest='S').encode('latin1')
+
+def boton_descarga_pdf(bytes_data, filename):
+    b64 = base64.b64encode(bytes_data).decode()
+    href = f'<a href="data:application/pdf;base64,{b64}" download="{filename}">📄 Descargar {filename}</a>'
+    st.markdown(href, unsafe_allow_html=True)
+
 # ============================================
 elif menu == "⬇️ Exportar CSV":
-    st.header("⬇️ Exportar datos como CSV")
-    if st.button("Descargar usuarios"):
-        df_u = pd.DataFrame(usuarios).T
-        st.download_button("Descargar CSV de Usuarios", df_u.to_csv(index=False), "usuarios.csv", "text/csv")
-    if st.button("Descargar facturas"):
-        df_f = pd.DataFrame(facturas)
-        st.download_button("Descargar CSV de Facturas", df_f.to_csv(index=False), "facturas.csv", "text/csv")
+    st.header("⬇️ Exportar datos como CSV o PDF")
+
+    # CSV
+    st.markdown("### 📥 Exportar como CSV")
+    df_u = pd.DataFrame(usuarios).T
+    df_f = pd.DataFrame(facturas)
+
+    st.download_button("📥 Descargar CSV de Usuarios", data=df_u.to_csv(index=False), file_name="usuarios.csv", mime="text/csv")
+    st.download_button("📥 Descargar CSV de Facturas", data=df_f.to_csv(index=False), file_name="facturas.csv", mime="text/csv")
+
+    # PDF
+    st.markdown("### 🧾 Exportar como PDF")
+    if st.button("📤 Exportar Usuarios en PDF"):
+        pdf_usuarios = generar_pdf_usuarios(usuarios)
+        boton_descarga_pdf(pdf_usuarios, "usuarios.pdf")
+
+    if st.button("📤 Exportar Facturas en PDF"):
+        pdf_facturas = generar_pdf_facturas(facturas)
+        boton_descarga_pdf(pdf_facturas, "facturas.pdf")
