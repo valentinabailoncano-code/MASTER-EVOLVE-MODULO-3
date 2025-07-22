@@ -240,3 +240,30 @@ elif menu == "Resumen Financiero":
         st.dataframe(resumen)
     else:
         st.info("ℹ️ No hay datos suficientes para mostrar el resumen.")
+
+# ============================================
+# 📈 ESTADÍSTICAS
+# ============================================
+elif menu == "📊 Ver Estadísticas":
+    st.header("📈 Estadísticas del Sistema")
+    if facturas:
+        df_f = pd.DataFrame(facturas)
+        df_f["fecha"] = pd.to_datetime(df_f["fecha"], format="%d/%m/%Y %H:%M")
+        facturas_mes = df_f.groupby(df_f["fecha"].dt.to_period("M")).size()
+        st.bar_chart(facturas_mes)
+        st.metric("Facturas totales", len(facturas))
+        st.metric("Importe medio (€)", round(df_f["monto"].mean(), 2))
+    else:
+        st.info("No hay datos de facturación disponibles.")
+
+# ============================================
+# ⬇️ EXPORTAR CSV
+# ============================================
+elif menu == "⬇️ Exportar CSV":
+    st.header("⬇️ Exportar datos como CSV")
+    if st.button("Descargar usuarios"):
+        df_u = pd.DataFrame(usuarios).T
+        st.download_button("Descargar CSV de Usuarios", df_u.to_csv(index=False), "usuarios.csv", "text/csv")
+    if st.button("Descargar facturas"):
+        df_f = pd.DataFrame(facturas)
+        st.download_button("Descargar CSV de Facturas", df_f.to_csv(index=False), "facturas.csv", "text/csv")
