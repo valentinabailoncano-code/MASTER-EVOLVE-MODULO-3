@@ -3,6 +3,7 @@ import datetime
 import re
 import os
 import streamlit as st
+import pandas as pd
 
 # ============================================
 # 📦 CARGA Y GUARDADO DE DATOS
