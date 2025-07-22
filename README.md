@@ -16,6 +16,8 @@ Aplicación web desarrollada en Python con Streamlit para gestionar usuarios y f
 - Consultar facturas por usuario
 - Buscar usuarios por nombre o email
 - Visualizar un resumen financiero (total, pagado y pendiente)
+- Ver estadísticas automáticas de facturación
+- Exportar datos como CSV y PDF
 - Persistencia automática en archivos `.json`
 
 ---
