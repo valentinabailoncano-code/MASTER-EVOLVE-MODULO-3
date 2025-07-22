@@ -18,10 +18,12 @@ Aplicación web desarrollada en Python con Streamlit para gestionar usuarios y f
 - Visualizar un resumen financiero (total, pagado y pendiente)
 - Persistencia automática en archivos `.json`
 
+---
 
 ## 🛠️ Cómo usar
 
-### ▶️ Ejecutar localmente
+#### ▶️ Ejecutar localmente
+
 
 1. Clona este repositorio:
 
@@ -40,7 +42,7 @@ Aplicación web desarrollada en Python con Streamlit para gestionar usuarios y f
 
 ---
 
-## 🌐 Despliegue en Streamlit Cloud
+### 🌐 Despliegue en Streamlit Cloud
 
 1. Sube estos archivos a un repositorio de GitHub:
    - proyecto/app.py
@@ -55,7 +57,7 @@ Aplicación web desarrollada en Python con Streamlit para gestionar usuarios y f
 
 ---
 
-## 📁 Estructura del Proyecto
+### 📁 Estructura del Proyecto
 
 MASTER-EVOLVE-MODULO-3/
 │
@@ -75,7 +77,7 @@ MASTER-EVOLVE-MODULO-3/
 
 ---
 
-## 💻 Comandos necesarios para que funcione el proyecto
+### 💻 Comandos necesarios para que funcione el proyecto
 
 💡 En Git Bash o terminal general
 
@@ -103,9 +105,8 @@ streamlit run proyecto/app.py
 
 ---
 
-## 👩‍💻 Autora
+### 👩‍💻 Autora
 
 Valentina Bailón Cano  
 Máster en Data Science & Inteligencia Artificial – EVOLVE  
 LinkedIn: https://www.linkedin.com/in/valentina-bailon-2653b22b7
-
